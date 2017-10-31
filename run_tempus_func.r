@@ -1,6 +1,6 @@
 
 # Function for extracting allele-specific details (as picked by Ensembl VEP 'ALLELE_NUM')
-get_ALT_INFO_value <- function(vcf, field_name, my_ALLELE_NUM) {
+get_ALT_INFO_value <- function(vcf, field_name, ALLELE_NUM) {
 
 	# Extract all ALT allele counts for field_name
 	field_values <- vcf@info[field_name]
@@ -8,7 +8,7 @@ get_ALT_INFO_value <- function(vcf, field_name, my_ALLELE_NUM) {
 	# Extract value for picked allele; indexed by 'ALLELE_NUM'
 	my_ALT <- NULL
 	for (idx in seq(nrow(field_values))) {
-		ALLELE_idx <- as.numeric(my_ALLELE_NUM[idx])
+		ALLELE_idx <- as.numeric(ALLELE_NUM[idx])
 		my_ALT <- c(my_ALT, as.numeric(field_values[[1]][[idx]][ALLELE_idx]))
 	}
 	return(my_ALT)
@@ -29,6 +29,12 @@ get_field <- function(vcf, field_name, info_type) {
 	return(sapply( vcf@info[[info_type]], function(x) strsplit(x ,"|", fixed=T)[[1]][field_name_idx]  ))
 	
 }
+
+# 
+
+
+
+
 
 # calculated variant consequences rank of SO terms used in --most_severe; 
 # this is primary pick_order used in VEP, as shown in: 
