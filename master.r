@@ -16,7 +16,7 @@
 	require('vcfR') 
 
 	# Load user-defined functions
-	source("run_tempus_func.r")
+	source("master_func.r")
 
 	# Convert command line arguments 
 	args = commandArgs(trailingOnly=TRUE)

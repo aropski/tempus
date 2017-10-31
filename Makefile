@@ -1,5 +1,7 @@
+#make -f Makefile variant_output_effect_pick.vcf Challenge_data_ExAC.vcf Challenge_data_final.vcf
 
-challenge_run: variant_output_effect_pick.vcf Challenge_data_ExAC.vcf Challenge_data_final.vcf Challenge_data_final.txt
+
+challenge_run: variant_output_effect_pick.vcf Challenge_data_ExAC.vcf Challenge_data_final.vcf
 
 .PHONY: challenge_run
 
@@ -15,9 +17,4 @@ Challenge_data_ExAC.vcf:
 # Add read count/freq to vcf
 Challenge_data_final.vcf: 
 	Rscript master.r ExAC.vcf hg19 
-
-# Create tab-delimited table of minimal data specific to challenge
-#Challenge_data_final.txt: Challenge_data_final.vcf
-#	Rscript create_table.r Challenge_data_final.vcf
-	
 
