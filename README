@@ -1,0 +1,158 @@
+Author:  Allan John Ropski
+Date: 	 2017/10/31
+Project: Tempus Coding Challenge
+
+		
+Table of Contents
+  Intro
+  Process
+  Usage
+  Version details
+				
+		
+--------------
+--- HELLO! ---
+--------------
+
+This submission includes of a set of programs designed to annotate a vcf file 
+with details for the most severe alternate allele, and two output files. This 
+document contains usage for running the programs and what they do. Everything 
+was done locally and GRCh37.75/hg19 were used for genome references. Version
+details for R and Ensembl are shown at bottom.
+
+
+---------------
+--- PROCESS ---
+---------------
+
+The challenge provided a vcf file referenced to human_g1k_v37.fasta, and is
+unphased. The Ensembl VEP program was utilized to add annotations in the 'ANN' 
+slot, selecting the most severe based on Sequence Ontology (SO). Importantly, 
+the --allele_number option specifies which was selected based on the (SO) 
+severity rank criteria. This first call also adds in 'GENE_PHENO' which 
+identifies hits to a variety of other sources, notably Cancer Gene Census. 
+
+The combination of allele frequency from ExAC requires setting 
+--vcf_info_field to 'ANN' instead of the default 'CSQ', where ExAC is added 
+into. Combining these two functions into a single call does not appear to work.
+
+An additional .html summary is also provided, logging the command line
+arugments, and presenting both tabular and graphical references.
+
+
+After adding annotations, the computation for count data was performed in R. 
+This also facilitated the addition of these values into the vcf data. Because 
+multiple alternates are present, 2 functions were created to extract the 
+allele-specific count data; referenced by the ALLELE_NUM field. This was then 
+used to create new variables prepended with "ALT_" for depth, count, and 
+frequency. 
+
+Lastly, a text-friendly table was created with minimal details, mainly those 
+in request. Each row is ID'd by the string 'CHROM_POS_REF/ALT' and is tab-
+delimited in the 'final_Challenge_data.txt' file.
+
+
+-------------
+--- USAGE ---
+-------------
+
+As everything was processed locally, the --cache --offline --assembly options 
+in Makefile require GRCh37/hg19 reference files, likewise for R.
+
+There are 3 program files included in submission:
+  (1) Makefile
+    This file is simply used to manage the series of calls to Ensembl's VEP 
+	and the R script master.r explained below.	
+	
+	The first commented line in file shows intended usage:		
+	make -f Makefile variant_output_effect_pick.vcf Challenge_data_ExAC.vcf \
+	  Challenge_data_final.vcf		
+	
+	If other genome builds are required, update:
+	  --assembly GRCh37
+	  --plugin ExAC.0.3.GRCh37.vcf.gz	
+	
+	VEP options are documented here:
+	https://www.ensembl.org/info/docs/tools/vep/script/vep_options.html
+		
+  (2) master_func.r
+	Sourced by master.r. Contains functions for extracting fields, and the rank
+	of Sequence Ontology terms, though this ranking is not used. These terms 
+	used by VEP are in conjunction with --pick_order are stored as SO_term_rank
+	
+	get_ALT_INFO_value: function that extracts INFO values considering when 
+	  multiple exist, returning the ALLELE_NUM index (vep --allele_number).
+	
+	get_field: function that extracts fields listed in the INFO header by name.
+	
+  (3) master.r
+    Requires:
+	  package VariantAnnotation
+	  pacakge GenomicRanges
+	  master_func.r 
+	The Makefile call has two required arguments, no default value, as shown 
+	in first two commented rows in file:
+	
+	#Rscript master.r ExAC.vcf hg19 
+	  args[1] names the annotated vcf from 2 Ensembl runs; 
+	  args[2] names the genome build
+	
+	If other genome builds are required, update 'hg19' and review package
+	requirements.
+
+
+----------------------------------------
+--- ENSEMBL VARIANT EFFECT PREDICTOR ---
+----------------------------------------
+
+	Versions:
+	  ensembl              : 90.4a44397
+	  ensembl-funcgen      : 90.743f32b
+	  ensembl-io           : 90.9a148ea
+	  ensembl-variation    : 90.58bf949
+	  ensembl-vep          : 90.6
+	  
+	
+---------------------
+--- R sessionInfo ---
+---------------------
+
+	R version 3.4.2 (2017-09-28)
+	Platform: x86_64-pc-linux-gnu (64-bit)
+	Running under: Ubuntu 16.04.3 LTS
+
+	Matrix products: default
+	BLAS: /usr/lib/libblas/libblas.so.3.6.0
+	LAPACK: /usr/lib/lapack/liblapack.so.3.6.0
+
+	locale:
+	 [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+	 [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+	 [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+	 [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+	 [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+	[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+	attached base packages:
+	[1] stats4    parallel  stats     graphics  grDevices utils     datasets 
+	[8] methods   base     
+
+	other attached packages:
+	 [1] VariantAnnotation_1.22.3   Rsamtools_1.28.0          
+	 [3] Biostrings_2.44.2          XVector_0.16.0            
+	 [5] SummarizedExperiment_1.6.5 DelayedArray_0.2.7        
+	 [7] matrixStats_0.52.2         Biobase_2.36.2            
+	 [9] GenomicRanges_1.28.6       GenomeInfoDb_1.12.3       
+	[11] IRanges_2.10.5             S4Vectors_0.14.7          
+	[13] BiocGenerics_0.22.1       
+
+	loaded via a namespace (and not attached):
+	 [1] Rcpp_0.12.13             compiler_3.4.2           GenomicFeatures_1.28.5  
+	 [4] bitops_1.0-6             tools_3.4.2              zlibbioc_1.22.0         
+	 [7] biomaRt_2.32.1           digest_0.6.12            bit_1.1-12              
+	[10] RSQLite_2.0              memoise_1.1.0            tibble_1.3.4            
+	[13] lattice_0.20-35          BSgenome_1.44.2          rlang_0.1.2             
+	[16] Matrix_1.2-11            DBI_0.7                  GenomeInfoDbData_0.99.0 
+	[19] rtracklayer_1.36.6       bit64_0.9-7              grid_3.4.2              
+	[22] AnnotationDbi_1.38.2     XML_3.98-1.9             BiocParallel_1.10.1     
+	[25] blob_1.1.0               GenomicAlignments_1.12.2 RCurl_1.95-4.8

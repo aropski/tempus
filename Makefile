@@ -8,7 +8,7 @@ challenge_run: variant_output_effect_pick.vcf Challenge_data_ExAC.vcf Challenge_
 
 # Annotate most deleterious allele with Ensemble VEP
 variant_output_effect_pick.vcf:
-	vep -species homo_sapiens --cache --offline --assembly GRCh37 -i Challenge_data.vcf --pick --flag_pick --variant_class --terms SO --allele_number --gene_phenotype --dont_skip --vcf_info_field ANN --fields ALLELE_NUM,GENE_PHENO,VARIANT_CLASS,HGNC_ID --vcf --output_file variant_effect_output_pick.vcf
+	vep -species homo_sapiens --cache --offline --assembly GRCh37 -i Challenge_data.vcf --pick --flag_pick --pick_order rank,canonical,appris,tsl,biotype,ccds,length --variant_class --terms SO --allele_number --gene_phenotype --dont_skip --vcf_info_field ANN --fields ALLELE_NUM,GENE_PHENO,VARIANT_CLASS,HGNC_ID --vcf --output_file variant_effect_output_pick.vcf
 
 # Annotate ExAC population allele frequency with Ensemble VEP
 Challenge_data_ExAC.vcf: 
