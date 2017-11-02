@@ -1,4 +1,5 @@
 
+
 # Function for extracting allele-specific details (as picked by Ensembl VEP 'ALLELE_NUM')
 get_ALT_INFO_value <- function(vcf, field_name, ALLELE_NUM) {
 
@@ -13,6 +14,7 @@ get_ALT_INFO_value <- function(vcf, field_name, ALLELE_NUM) {
 	}
 	return(my_ALT)
 }
+
 
 # Function for extracting annotation descriptions, matching by field_name to INFO header
 get_field <- function(vcf, field_name, info_type) {
@@ -30,11 +32,47 @@ get_field <- function(vcf, field_name, info_type) {
 	
 }
 
-# 
+
+# Convert vcf format to ExAC Variant Id as: CHROMOSOME-POSITION-REFERENCE-VARIANT
+convert_vcf_to_exac <-  function(vcf_key) {
+	return(gsub(":|/|_", "-", vcf_key))
+}
+
+	
+# Function for sending bulk request to ExAC API
+get_ExAC <- function(vep_vcf) {
+
+	# Convert vcf format to ExAC Variant Id as: CHROMOSOME-POSITION-REFERENCE-VARIANT
+	JSON_KEY <- as.vector(sapply(rownames(info(vep_vcf)), function (x) convert_vcf_to_exac(x)))
+
+	# Query in bulk; does not return same order
+	req <- POST("http://exac.hms.harvard.edu/rest/bulk/variant", 
+				body = toJSON(JSON_KEY), encode='json')
+	stop_for_status(req)
+	json <- fromJSON(content(req, "text"))
+
+	# Match returned json to vep_vcf order
+	json_adj <- json[match(JSON_KEY, names(json))]
+
+	# Audit 
+	if(!all(names(json_adj) == JSON_KEY)) {
+		stop("ExAC mapping does not match vep_vcf names!!!")
+	} 
+	
+	return(json_adj)
+	
+}
 
 
-
-
+# Function for preventing NULL values for missing ExAC annotations
+get_ExAC_field <- function(x) {
+	if(is.null(x)) {
+		return(NA)
+	} else {
+		return(x[[1]])
+	}
+}
+	
 
 # calculated variant consequences rank of SO terms used in --most_severe; 
 # this is primary pick_order used in VEP, as shown in: 
