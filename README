@@ -30,15 +30,9 @@ unphased. The Ensembl VEP program was utilized to add annotations in the 'ANN'
 slot, selecting the most severe based on Sequence Ontology (SO). Importantly, 
 the --allele_number option specifies which was selected based on the (SO) 
 severity rank criteria. This first call also adds in 'GENE_PHENO' which 
-identifies hits to a variety of other sources, notably Cancer Gene Census. 
-
-The combination of allele frequency from ExAC requires setting 
---vcf_info_field to 'ANN' instead of the default 'CSQ', where ExAC is added 
-into. Combining these two functions into a single call does not appear to work.
-
-An additional .html summary is also provided, logging the command line
+identifies hits to a variety of other sources, notably Cancer Gene Census. An 
+additional .html summary is also provided with VEP, logging the command line
 arugments, and presenting both tabular and graphical references.
-
 
 After adding annotations, the computation for count data was performed in R. 
 This also facilitated the addition of these values into the vcf data. Because 
@@ -46,6 +40,12 @@ multiple alternates are present, 2 functions were created to extract the
 allele-specific count data; referenced by the ALLELE_NUM field. This was then 
 used to create new variables prepended with "ALT_" for depth, count, and 
 frequency. 
+
+Next, ExAC annotations for allele frequency and RSID were queried through the
+bulk API feature at "http://exac.hms.harvard.edu/". The ID used is the same
+as the vcf identifier, with hyphens replacing other special characters. The 
+request is not returned in the same order as supplied, so a match is done to 
+align with vcf file.
 
 Lastly, a text-friendly table was created with minimal details, mainly those 
 in request. Each row is ID'd by the string 'CHROM_POS_REF/ALT' and is tab-
