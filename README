@@ -78,22 +78,32 @@ There are 3 program files included in submission:
   (2) master_func.r
 	Sourced by master.r. Contains functions for extracting fields, and the rank
 	of Sequence Ontology terms, though this ranking is not used. These terms 
-	used by VEP are in conjunction with --pick_order are stored as SO_term_rank
+	used by VEP are in conjunction with --pick_order and stored as SO_term_rank.
 	
 	get_ALT_INFO_value: function that extracts INFO values considering when 
 	  multiple exist, returning the ALLELE_NUM index (vep --allele_number).
 	
-	get_field: function that extracts fields listed in the INFO header by name.
+	get_field: function that extracts fields listed in the INFO header by name
+	
+	get_ExAC: posts variant IDs from vcf to ExAC API; converts from vcf format
+	
+	get_ExAC_field: function for preventing NULL values for missing ExAC annotations
+	
 	
   (3) master.r
     Requires:
 	  package VariantAnnotation
 	  pacakge GenomicRanges
 	  master_func.r 
-	The Makefile call has two required arguments, no default value, as shown 
+	  
+	This program reads in the output vcf file from Ensembl VEP, adds new 
+	annotations via ExAC API, extracts read count details for the picked variant,
+	and outputs a complete vcf along with a table containing basic details.
+	  
+	The Makefile call has two required arguments (no set defaults), as shown 
 	in first two commented rows in file:
 	
-	#Rscript master.r ExAC.vcf hg19 
+	#Rscript master.r variant_output_effect_pick.vcf hg19 
 	  args[1] names the annotated vcf from 2 Ensembl runs; 
 	  args[2] names the genome build
 	
